@@ -1,0 +1,102 @@
+
+if [ $(git version &> /dev/null; echo $?) != 0 ]; then
+  apt-get update
+  apt-get install -y git make
+fi
+
+if [ $(gvp version &> /dev/null; echo $?) != 0 ]; then
+  echo "Installing gvp (Go Versioning Packager)"
+  CURRENT=`pwd`
+  cd /tmp
+  git clone https://github.com/pote/gvp.git && cd gvp
+  git checkout v0.1.0
+  ./configure
+  make install
+  cd $CURRENT
+fi
+
+if [ $(gpm version &> /dev/null; echo $?) != 0 ]; then
+  echo "Installing gpm (Go Package Manager)"
+  CURRENT=`pwd`
+  cd /tmp
+  git clone https://github.com/pote/gpm.git && cd gpm
+  git checkout v1.3.1
+  ./configure
+  make install
+  cd $CURRENT
+fi
+
+read -p "Project name [project]? " PROJECT
+if [ "$PROJECT" == "" ]; then
+  PROJECT="project"
+fi
+
+read -p "Organization [org]? " ORGANIZATION
+if [ "$ORGANIZATION" == "" ]; then
+  ORGANIZATION="org"
+fi
+
+echo "Creating project $PROJECT"
+mkdir -p $PROJECT/src
+cd $PROJECT
+
+echo "Initialize Dependencies"
+gvp init
+touch Godeps
+
+echo "Writing default Dockerfile"
+echo "FROM google/golang-runtime" > src/Dockerfile
+echo "$ORGANIZATION" > src/.godir
+
+echo "Writing default main.go"
+cat > src/main.go <<'endscript'
+package main
+
+import (
+  "fmt"
+)
+
+func main() {
+  fmt.Println("Hello World")
+}
+endscript
+
+echo "Setting run script"
+cat > run.sh <<'endscript'
+#!/bin/bash
+
+if [ ! -e src/replace ]; then
+  ln -s `pwd`/src src/replace
+fi
+
+if [ -z ${GVP_NAME} ]; then
+  gvp in go run src/main.go $@
+else
+  go run src/main.go $@
+fi
+endscript
+
+sed -i "s/replace/$ORGANIZATION/g" run.sh
+
+echo "Setting build script"
+cat > build.sh <<'endscript'
+#!/bin/bash
+
+ORG=${ORG:-replace}
+NAME=${NAME:-${PWD##*/}}
+TAG=${TAG:-latest}
+
+FULLNAME=$ORG/$NAME:$TAG
+
+echo -e "--- \e[93mBuilding\e[0m \e[1m$FULLNAME\e[0m"
+docker build -t $FULLNAME src
+echo " "
+if [[ $! -eq 0 ]]; then
+  echo -e "\e[42m---\e[0m \e[32mBuild Completed\e[0m \e[1m$FULLNAME\e[0m"
+else
+  echo -e "\e[41m---\e[0m \e[31mBuild Failed\e[0m \e[1m$FULLNAME\e[0m"
+fi
+
+endscript
+
+sed -i "s/replace/$ORGANIZATION/g" build.sh
