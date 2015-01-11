@@ -2,14 +2,14 @@
 
 if [ $(git version &> /dev/null; echo $?) != 0 ]; then
   apt-get update
-  apt-get install -y git make
+  apt-get install -y git
 fi
 
 if [ $(gvp version &> /dev/null; echo $?) != 0 ]; then
   echo "Installing gvp (Go Versioning Packager)"
   if [ $(make --help &> /dev/null; echo $?) != 0 ]; then
     apt-get update
-    apt-get install -y git make
+    apt-get install -y make
   fi
   CURRENT=`pwd`
   cd /tmp
@@ -24,7 +24,7 @@ if [ $(gpm version &> /dev/null; echo $?) != 0 ]; then
   echo "Installing gpm (Go Package Manager)"
   if [ $(make --help &> /dev/null; echo $?) != 0 ]; then
     apt-get update
-    apt-get install -y git make
+    apt-get install -y make
   fi
   CURRENT=`pwd`
   cd /tmp
@@ -70,6 +70,16 @@ func main() {
 }
 endscript
 
+echo "Writing default plugins.go"
+cat > src/plugins.go <<'endscript'
+package main
+
+import (
+  // place your plugins imports here
+)
+
+endscript
+
 echo "Setting run script"
 cat > run.sh <<'endscript'
 #!/bin/bash
@@ -78,11 +88,16 @@ if [ ! -e src/replace ]; then
   ln -s `pwd`/src src/replace
 fi
 
+local __PWD=`pwd`
+cd src
+
 if [ -z ${GVP_NAME} ]; then
-  gvp in go run src/main.go $@
+  gvp in go run -v -race plugins.go main.go $@
 else
-  go run src/main.go $@
+  go run -v -race plugins.go main.go $@
 fi
+cd $__PWD
+
 endscript
 
 sed -i "s/replace/$ORGANIZATION/g" run.sh
@@ -109,7 +124,8 @@ fi
 
 endscript
 
-sed -i "s/replace/$ORGANIZATION/g" build.sh
+NODOT_ORG=$(echo $ORGANIZATION | tr -d '.')
+sed -i "s/replace/$NODOT_ORG/g" build.sh
 chmod u+x build.sh
 
 echo "Done"
