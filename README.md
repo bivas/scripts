@@ -12,7 +12,7 @@ Build a template Golang project
 Using:
 - [gvp](https://github.com/pote/gvp)
 - [gpm](https://github.com/pote/gpm)
-- docker (google/golang-runtime)
+- docker (golang:1.4-onbuild)
 
 **install** 
 
