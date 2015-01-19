@@ -55,7 +55,7 @@ gvp init
 touch Godeps
 
 echo "Writing default Dockerfile"
-echo "FROM google/golang-runtime" > src/Dockerfile
+echo "FROM golang:1.4-onbuild" > src/Dockerfile
 echo "$ORGANIZATION" > src/.godir
 
 echo "Writing default main.go"
