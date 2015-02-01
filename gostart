@@ -116,12 +116,14 @@ FULLNAME=$ORG/$NAME:$TAG
 
 echo -e "--- \e[93mBuilding\e[0m \e[1m$FULLNAME\e[0m"
 docker build -t $FULLNAME src
+EXIT=$?
 echo " "
-if [[ $! -eq 0 ]]; then
+if [[ $EXIT -eq 0 ]]; then
   echo -e "\e[42m---\e[0m \e[32mBuild Completed\e[0m \e[1m$FULLNAME\e[0m"
 else
   echo -e "\e[41m---\e[0m \e[31mBuild Failed\e[0m \e[1m$FULLNAME\e[0m"
 fi
+exit $EXIT
 
 endscript
 
