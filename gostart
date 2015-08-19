@@ -14,7 +14,7 @@ if [ $(gvp version &> /dev/null; echo $?) != 0 ]; then
   CURRENT=`pwd`
   cd /tmp
   git clone https://github.com/pote/gvp.git && cd gvp
-  git checkout v0.1.0
+  git checkout v0.2.1
   ./configure
   make install
   cd $CURRENT
@@ -29,7 +29,7 @@ if [ $(gpm version &> /dev/null; echo $?) != 0 ]; then
   CURRENT=`pwd`
   cd /tmp
   git clone https://github.com/pote/gpm.git && cd gpm
-  git checkout v1.3.1
+  git checkout v1.3.2
   ./configure
   make install
   cd $CURRENT
