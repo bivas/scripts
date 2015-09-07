@@ -16,17 +16,17 @@ function run_test {
     local _BEFORE=$3
     local _AFTER=$4
     if [ "${_BEFORE}" != "" ]; then
-        echo -e "Running before \e[1;33m'$_NAME'\e[0m"
-        eval $_BEFORE &> /dev/null
+        echo -e "Running before \e[1;33m'${_NAME}'\e[0m"
+        eval ${_BEFORE} &> /dev/null
     fi
-    echo -ne "Running test case \e[1;33m'$_NAME'\e[0m ... "
-    local _RESULT=$(eval $_TEST &> /dev/null ; echo $?)
-    test $_RESULT -eq 0 && ok || fail
+    echo -ne "Running test case \e[1;33m'${_NAME}'\e[0m ... "
+    local _RESULT=$(eval ${_TEST} &> /dev/null ; echo $?)
+    test ${_RESULT} -eq 0 && ok || fail
     if [ "${_AFTER}" != "" ]; then
         echo -e "Running after \e[1;33m'$_NAME'\e[0m"
-        eval $_AFTER &> /dev/null
+        eval ${_AFTER} &> /dev/null
     fi
-    return $_RESULT
+    return ${_RESULT}
 }
 
 function main() {
